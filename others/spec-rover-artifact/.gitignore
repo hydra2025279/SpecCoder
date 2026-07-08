@@ -1,0 +1,12 @@
+.venv/
+
+__pycache__/
+
+*.png
+venn.pdf
+
+.vscode/
+
+linux_kernel/
+
+examples/**/*.html

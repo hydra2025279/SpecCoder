@@ -1,0 +1,261 @@
+2024-05-21 11:25:08.082 | INFO     | Model API request cost info: input_tokens=473, output_tokens=634, cost=0.023750
+2024-05-21 11:25:28.085 | INFO     | Model API request cost info: input_tokens=473, output_tokens=631, cost=0.023660
+2024-05-21 11:25:28.625 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:25:39.773 | INFO     | Model API request cost info: input_tokens=649, output_tokens=395, cost=0.018340
+2024-05-21 11:25:39.777 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:25:42.741 | INFO     | Model API request cost info: input_tokens=728, output_tokens=72, cost=0.009440
+2024-05-21 11:25:42.742 | DEBUG    | Extracted a valid json
+2024-05-21 11:25:50.697 | DEBUG    | Agent search analyzing search results.
+2024-05-21 11:26:07.382 | INFO     | Model API request cost info: input_tokens=7080, output_tokens=555, cost=0.087450
+2024-05-21 11:26:07.387 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:26:15.578 | INFO     | Model API request cost info: input_tokens=7706, output_tokens=223, cost=0.083750
+2024-05-21 11:26:15.581 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:26:17.063 | INFO     | Model API request cost info: input_tokens=556, output_tokens=14, cost=0.005980
+2024-05-21 11:26:17.063 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:17.063 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:26:18.289 | INFO     | Model API request cost info: input_tokens=556, output_tokens=14, cost=0.005980
+2024-05-21 11:26:18.290 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:18.290 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:26:19.369 | INFO     | Model API request cost info: input_tokens=556, output_tokens=14, cost=0.005980
+2024-05-21 11:26:19.370 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:19.370 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:26:20.559 | INFO     | Model API request cost info: input_tokens=556, output_tokens=14, cost=0.005980
+2024-05-21 11:26:20.559 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:20.559 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:26:21.868 | INFO     | Model API request cost info: input_tokens=556, output_tokens=14, cost=0.005980
+2024-05-21 11:26:21.869 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:21.870 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:26:23.843 | INFO     | Model API request cost info: input_tokens=7933, output_tokens=4, cost=0.079450
+2024-05-21 11:26:23.844 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:26:24.924 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:24.924 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:24.924 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:26:26.117 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:26.118 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:26.118 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:26:27.591 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:27.592 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:27.592 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:26:28.622 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:28.623 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:28.623 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:26:29.791 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:29.791 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:29.792 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:26:32.397 | INFO     | Model API request cost info: input_tokens=7941, output_tokens=4, cost=0.079530
+2024-05-21 11:26:32.399 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:26:33.406 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:33.407 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:33.407 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:26:34.392 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:34.392 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:34.393 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:26:35.427 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:35.428 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:35.428 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:26:36.729 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:36.729 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:36.730 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:26:37.867 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:37.867 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:37.868 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:26:38.887 | INFO     | Model API request cost info: input_tokens=7949, output_tokens=4, cost=0.079610
+2024-05-21 11:26:38.888 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:26:40.293 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:40.293 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:40.294 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:26:41.648 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:41.649 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:41.649 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:26:42.957 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:42.958 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:42.958 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:26:44.007 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:44.008 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:44.008 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:26:45.252 | INFO     | Model API request cost info: input_tokens=337, output_tokens=14, cost=0.003790
+2024-05-21 11:26:45.252 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:45.253 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:26:46.179 | INFO     | Model API request cost info: input_tokens=7957, output_tokens=3, cost=0.079660
+2024-05-21 11:26:46.180 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:26:47.491 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:26:47.492 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:47.492 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:26:48.493 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:26:48.494 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:48.494 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:26:49.829 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:26:49.830 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:49.830 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:26:51.249 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:26:51.250 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:51.250 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:26:52.460 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:26:52.460 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:52.461 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:26:54.273 | INFO     | Model API request cost info: input_tokens=7964, output_tokens=3, cost=0.079730
+2024-05-21 11:26:54.274 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:26:55.253 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:26:55.253 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:55.254 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:26:56.318 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:26:56.319 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:56.319 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:26:57.332 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:26:57.333 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:57.333 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:26:58.609 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:26:58.610 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:26:58.610 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:27:00.025 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:00.026 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:00.026 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:27:00.865 | INFO     | Model API request cost info: input_tokens=7971, output_tokens=3, cost=0.079800
+2024-05-21 11:27:00.867 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:27:01.911 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:01.911 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:01.911 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:27:03.122 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:03.123 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:03.123 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:27:04.007 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:04.008 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:04.008 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:27:05.685 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:05.686 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:05.686 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:27:07.027 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:07.027 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:07.028 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:27:07.895 | INFO     | Model API request cost info: input_tokens=7978, output_tokens=3, cost=0.079870
+2024-05-21 11:27:07.896 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:27:09.044 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:09.044 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:09.044 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:27:10.228 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:10.229 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:10.229 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:27:11.553 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:11.553 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:11.553 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:27:12.882 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:12.883 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:12.883 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:27:14.039 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:14.040 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:14.040 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:27:15.148 | INFO     | Model API request cost info: input_tokens=7985, output_tokens=3, cost=0.079940
+2024-05-21 11:27:15.149 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:27:16.292 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:16.293 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:16.293 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:27:17.405 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:17.405 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:17.405 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:27:18.542 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:18.542 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:18.542 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:27:19.896 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:19.897 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:19.897 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:27:20.895 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:20.896 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:20.897 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:27:23.669 | INFO     | Model API request cost info: input_tokens=7992, output_tokens=3, cost=0.080010
+2024-05-21 11:27:23.670 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:27:25.481 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:25.482 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:25.482 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:27:26.934 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:26.934 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:26.935 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:27:28.320 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:28.321 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:28.321 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:27:29.703 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:29.703 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:29.704 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:27:30.865 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:30.866 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:30.867 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:27:31.871 | INFO     | Model API request cost info: input_tokens=7999, output_tokens=3, cost=0.080080
+2024-05-21 11:27:31.873 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:27:33.505 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:33.505 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:33.505 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:27:34.878 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:34.879 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:34.879 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:27:36.162 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:36.163 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:36.163 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:27:37.113 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:37.113 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:37.113 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:27:38.333 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:38.333 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:38.334 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:27:39.202 | INFO     | Model API request cost info: input_tokens=8006, output_tokens=3, cost=0.080150
+2024-05-21 11:27:39.203 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:27:40.198 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:40.199 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:40.199 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:27:41.545 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:41.546 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:41.546 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:27:42.639 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:42.640 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:42.640 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:27:43.809 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:43.810 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:43.810 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:27:45.424 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:45.424 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:45.425 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:27:46.230 | INFO     | Model API request cost info: input_tokens=8013, output_tokens=3, cost=0.080220
+2024-05-21 11:27:46.232 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:27:47.805 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:47.806 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:47.806 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:27:49.037 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:49.038 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:49.038 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:27:50.022 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:50.023 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:50.023 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:27:51.088 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:51.088 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:51.088 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:27:52.329 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:52.330 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:52.330 | DEBUG    | Agent search selecting APIs to call.
+2024-05-21 11:27:53.626 | INFO     | Model API request cost info: input_tokens=8020, output_tokens=3, cost=0.080290
+2024-05-21 11:27:53.627 | DEBUG    | Trying to select search APIs in json. Try 1 of 5.
+2024-05-21 11:27:54.811 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:54.812 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:54.812 | DEBUG    | Trying to select search APIs in json. Try 2 of 5.
+2024-05-21 11:27:56.536 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:56.536 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:56.536 | DEBUG    | Trying to select search APIs in json. Try 3 of 5.
+2024-05-21 11:27:57.552 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:57.552 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:57.552 | DEBUG    | Trying to select search APIs in json. Try 4 of 5.
+2024-05-21 11:27:58.973 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:27:58.974 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:27:58.974 | DEBUG    | Trying to select search APIs in json. Try 5 of 5.
+2024-05-21 11:28:00.137 | INFO     | Model API request cost info: input_tokens=336, output_tokens=14, cost=0.003780
+2024-05-21 11:28:00.138 | DEBUG    | Both API_calls and bug_locations are empty. Will retry.
+2024-05-21 11:28:00.138 | INFO     | Too many rounds. Try writing patch anyway.
+2024-05-21 11:28:00.139 | DEBUG    | Gathered enough information. Invoking write_patch.
+2024-05-21 11:28:00.142 | INFO     | Trying to write a patch. Try 1.
+2024-05-21 11:28:24.820 | INFO     | Model API request cost info: input_tokens=8199, output_tokens=652, cost=0.101550
+2024-05-21 11:28:24.825 | INFO     | Raw patch produced in try 1. Writing patch into file.
+2024-05-21 11:28:24.966 | INFO     | Trying to write a patch. Try 2.
+2024-05-21 11:28:47.978 | INFO     | Model API request cost info: input_tokens=8883, output_tokens=583, cost=0.106320
+2024-05-21 11:28:47.986 | INFO     | Raw patch produced in try 2. Writing patch into file.
+2024-05-21 11:28:47.988 | INFO     | Trying to write a patch. Try 3.
+2024-05-21 11:29:08.214 | INFO     | Model API request cost info: input_tokens=9494, output_tokens=452, cost=0.108500
+2024-05-21 11:29:08.218 | INFO     | Raw patch produced in try 3. Writing patch into file.
+2024-05-21 11:29:08.218 | INFO     | Invoked write_patch. Ending workflow.
+2024-05-21 11:29:08.353 | INFO     | Task django__django-11815 completed successfully.
+2024-05-21 11:29:08.354 | INFO     | No patch generated. You can try running ACR again.

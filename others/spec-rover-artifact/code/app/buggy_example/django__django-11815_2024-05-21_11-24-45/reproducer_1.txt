@@ -1,0 +1,65 @@
+# reproducer.py
+import sys
+from enum import Enum
+
+from django.conf import settings
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+# Setup minimal Django configuration
+settings.configure(
+    INSTALLED_APPS=[
+        "__main__",  # Treat this script as a Django app for model discovery
+    ],
+    DATABASES={
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
+    },
+    USE_I18N=True,
+    LANGUAGE_CODE="en-us",
+    BASE_DIR="",
+)
+
+# Required to finalize Django setup
+import django
+
+django.setup()
+
+
+# Define the Enum and Model as described in the issue
+class Status(Enum):
+    GOOD = _("Good")  # 'Good' will be translated
+    BAD = _("Bad")  # 'Bad' will be translated
+
+    def __str__(self):
+        return self.name
+
+
+class Item(models.Model):
+    status = models.CharField(default=Status.GOOD, max_length=128)
+
+
+# Mimic the migration process and check for the issue
+def check_migration_issue():
+    # Attempt to simulate the issue described
+    try:
+        # This is a simplification. In reality, Django migrations would not execute this way.
+        # Instead, this simulates the effect of having the Enum value directly in the migration file.
+        item = Item(
+            status=Status.GOOD.value
+        )  # Simulate using the Enum value as in the migration
+        assert (
+            item.status == Status.GOOD.name
+        ), "Migration used Enum value instead of name"
+    except ValueError as e:
+        print(f"AssertionError: {e}")
+        sys.exit(1)  # Exit with error code to indicate the issue is present
+
+    print("Issue not present. Exiting with code 0.")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    check_migration_issue()

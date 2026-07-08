@@ -1,0 +1,13 @@
+{
+    "commit": "878cd465330384d554d23e2d1b1cdc171232a0f8",
+    "start_epoch": 1716261885.72954,
+    "end_epoch": 1716262148.219167,
+    "elapsed_seconds": 262.489627,
+    "model": "gpt-4-0125-preview",
+    "input_cost_per_token": 1e-05,
+    "output_cost_per_token": 3e-05,
+    "total_input_tokens": 172028,
+    "total_output_tokens": 5219,
+    "total_tokens": 177247,
+    "total_cost": 1.8768499999999966
+}
