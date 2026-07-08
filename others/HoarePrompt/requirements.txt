@@ -1,0 +1,6 @@
+openai
+tenacity
+astor
+groq
+pytest
+requests
