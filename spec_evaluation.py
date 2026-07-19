@@ -16,8 +16,6 @@ from SpecCoder.trace_collection import (
 
 
 def _select_tests(test_cases: list, is_codeforces: bool) -> list:
-    """Codeforces tests are ``[{input, output}, ...]`` with no ``testtype`` key,
-    so the functional-only filter used for LeetCode would drop all of them."""
     if is_codeforces:
         return list(test_cases)
     return [test for test in test_cases if test.get("testtype") == "functional"]
@@ -54,9 +52,6 @@ def _run_bounded(
     max_workers: int,
     per_job_timeout: float,
 ) -> dict[int, Any]:
-    """Run ``jobs`` (each ``(fn, args)``) in forked children, at most
-    ``max_workers`` concurrently. Returns ``{job_index: fn(*args)}``; a job that
-    exceeds ``per_job_timeout`` (or dies without producing) maps to ``None``."""
     results: dict[int, Any] = {}
     n = len(jobs)
     if n == 0:
@@ -113,10 +108,6 @@ def _trace_unit(
     timeout: int,
     is_codeforces: bool,
 ) -> dict[str, Any] | None:
-    """Run ONE test trace inline (no further forking). Returns the per-trace_key
-    result dict, or ``None`` for a non-runnable test. Executes inside a forked
-    child via ``_run_bounded``; its own SIGALRM soft-timeout bounds pure-Python
-    loops, and the scheduler hard-kills it if that fails."""
     if is_codeforces:
         return evaluate_one_test_trace_stdin(
             code, spec_dict, test.get("input", "") or "",
@@ -226,8 +217,6 @@ def compute_correctness(
 
 
 def _fold_mutant_test(out_key: dict[str, Any], info: dict[str, Any], index: int) -> None:
-    """Fold one test's per-spec ``info`` into a mutant's running per-spec totals
-    (same accounting the old ``_batched_mutant_worker`` produced)."""
     reach_count = info.get("reach_count", 0)
     pass_count = info.get("pass_count", 0)
     out_key["execution_reach_count"] += reach_count
@@ -257,14 +246,6 @@ def compute_completeness_batched(
     is_codeforces: bool = False,
     test_workers: int = 1,
 ) -> dict[str, dict[str, Any]]:
-    """Evaluate all specs together for each mutant program.
-
-    Every (mutant, test) pair is one flat job run through ``_run_bounded`` with a
-    hard cap of ``test_workers`` concurrent forked children — there is no nested
-    pool, so process count never exceeds the cap and a hung mutant is killed by
-    process group without orphaning anything. ``batch_size``/``outer_timeout`` are
-    accepted for backward compatibility but the cap is now ``test_workers``.
-    """
     functional = _select_tests(test_cases, is_codeforces)
     out = {
         str(key): {
