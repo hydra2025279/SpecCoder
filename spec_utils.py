@@ -136,12 +136,6 @@ DANGEROUS_MODULE_NAMES = {
 
 
 def find_assertion_safety_violations(expr: str) -> list[str]:
-    """Return reasons why an assertion expression is unsafe to execute inline.
-
-    The filter is intentionally conservative for common state-changing Python
-    operations. It is not a proof of purity, but it catches the mutations that
-    can corrupt later assertions when all specs are traced in one run.
-    """
     try:
         tree = ast.parse(expr, mode="eval")
     except SyntaxError:
@@ -387,9 +381,6 @@ def _find_enclosing_funcs(tree: ast.AST, target_line: int) -> list[ast.AST]:
 def _collect_in_scope_vars(tree: ast.AST, target_line: int) -> set[str]:
     enclosing = _find_enclosing_funcs(tree, target_line)
     if not enclosing:
-        # Top-level (codeforces stdin/stdout) script: no enclosing function, so
-        # the "in scope" variables are the module-level names bound before this
-        # line (e.g. inputs parsed from input()/sys.stdin and accumulators).
         vars_in_scope: set[str] = set()
         for stmt in _iter_func_body_no_nested(tree):
             lineno = getattr(stmt, "lineno", None)
