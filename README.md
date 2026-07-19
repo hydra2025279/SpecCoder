@@ -33,7 +33,7 @@ Unzip data
 cd SpecCoder
 unzip data
 ```
-Folder structure, the training data of SpecCoder is `training_data/speccoder_reasoning_sft.json`, the mutants used during this data creation
+Training data of SpecCoder is `training_data/speccoder_reasoning_sft.json`, the mutants used during this data creation
 process is `training_data/LeetCode_mutant.jsonl`.
 ```text
 data/
