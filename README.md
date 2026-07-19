@@ -1,6 +1,6 @@
 # SpecCoder
 
-Artifact for the paper Toward Reliable Verification: Teaching LLMs to Think in Intermediate Formal Contracts
+Artifact for the paper **Toward Reliable Verification: Teaching LLMs to Think in Intermediate Formal Contracts.**
 
 ## Setup
 
@@ -10,7 +10,6 @@ conda activate speccoder
 cd SpecCoder
 export PYTHONPATH="$(cd .. && pwd)"
 pip install -r requirements.txt
-unzip data
 ```
 
 ## Models
@@ -29,7 +28,13 @@ adapter:
 ```
 
 ## Data
-
+Unzip data
+```bash
+cd SpecCoder
+unzip data
+```
+Folder structure, the training data of SpecCoder is `training_data/speccoder_reasoning_sft.json`, the mutants used during this data creation
+process is `training_data/LeetCode_mutant.jsonl`.
 ```text
 data/
 ├── humanexec.jsonl
