@@ -67,8 +67,6 @@ def _reach_satisfy_from_dict(rs_dict: dict | None):
 
 
 def _checkpoint_analysis(rs_dict: dict | None) -> str:
-    """Rebuild the repair prompt's per-checkpoint execution analysis from a saved
-    reach/satisfy result dict (all checkpoints, not only violated)."""
     result = _reach_satisfy_from_dict(rs_dict)
     if result is None:
         return ""
@@ -102,23 +100,7 @@ def build_localize_prompt(
     violated: list[alpha_beta.SpecReachSatisfy] | None = None,
     reach_satisfy_result: dict | None = None,
 ) -> str:
-    """Localize prompt. Three shapes depending on the method's signal:
-
-    * **assertrepair** (``annotated_code`` + reach/satisfy evidence): show the program WITH the inline
-      ``# assert`` checkpoints (to understand) — NOT line-numbered — plus the violated
-      checkpoint specs and execution analysis (no checkpoint line numbers).
-    * **hoareprompt / specrover** (``signal_text``): show a ``### <method>
-      signal`` block (not line-numbered).
-    * **naive / cot** (no signal): just the problem.
-
-    In ALL cases the CLEAN program is shown LAST as the ONLY line-numbered (1-based)
-    block and is the prediction frame: the model reasons on the method context above but
-    predicts line numbers against the clean program. The model VERIFIES the signal first
-    (it may be wrong) and, if unreasonable, localizes on its own."""
     problem = common.problem_text(sample)
-    # The CLEAN program is the ONLY line-numbered block and the prediction target. It is
-    # placed BELOW the method context so the model reasons on the context then predicts
-    # against these line numbers. True for every method.
     clean_block = (
         "### Buggy program — PREDICT line numbers against THIS (the ONLY 1-based line numbering)\n"
         f"```\n{number_source(clean_code)}\n```"
@@ -132,11 +114,6 @@ def build_localize_prompt(
     annotated_rs = _annotate_with_reach_satisfy(annotated_code, reach_satisfy_result)
 
     if annotated_code is not None and (violated or analysis):
-        # Same shape as the repair prompt: a single GUIDE (placed BEFORE the annotated
-        # program) explains how to read the inline `(reached by …)` evidence — the
-        # per-checkpoint reach/satisfy counts are inlined next to each `# assert`, so we
-        # do NOT repeat a "Violated specifications" / "Checkpoint analysis" block. The
-        # CLEAN program stays the ONLY line-numbered block and the prediction target.
         guide = (
             "### Guide — how to read the behavioural checkpoints\n"
             "Read the ANNOTATED BUGGY PROGRAM below carefully. Each `# assert` is placed after an "
@@ -229,20 +206,9 @@ def localize_messages(
 
 
 def parse_prediction(response: str, clean_code: str | None = None) -> list[str]:
-    """Pull the predicted 1-based line numbers out of the model response.
-
-    Primary format: a list of ``(line_number, line_content)`` tuples inside a
-    ``<localize>...</localize>`` tag, e.g. ``<localize>[(7, "    c = a - b"), (2, "x = 1")]
-    </localize>`` (least → most certain). Also accepts a bare list of numbers inside the
-    tag, and falls back to the legacy ``<solution>``/```json``` list of ``"<line>:<content>"``
-    strings for cached responses. We take only the line NUMBER from the model and pair it with
-    the AUTHORITATIVE content of that line from ``clean_code`` (so stored content can't drift
-    from the source); when ``clean_code`` is absent the model's content (if any) is kept.
-    Out-of-range / non-numeric items are dropped, order preserved, duplicate lines collapsed."""
     scope = response or ""
     items: list[Any] = []
 
-    # Primary: <localize>[ (line, content), ... ]</localize> (or a bare list of numbers).
     loc = re.search(r"<localize>(.*?)(?:</localize>|\Z)", scope, re.DOTALL | re.IGNORECASE)
     if loc:
         inner = loc.group(1)
@@ -337,8 +303,6 @@ def _existing_task_ids(path: str | None) -> set[str]:
 
 
 def append_localize_records(path: str, records: list[dict[str, Any]]) -> None:
-    """Append localize records, skipping any ``task_id`` already present (resume
-    safe). Serialized with a lock so concurrent writers don't interleave."""
     if not path or not records:
         return
     with _LOCALIZE_WRITE_LOCK:
@@ -354,11 +318,6 @@ def append_localize_records(path: str, records: list[dict[str, Any]]) -> None:
 
 
 def load_localize_prompts(path: str | None) -> dict[str, dict[str, Any]]:
-    """Read ``localize_prompt.jsonl`` -> ``{task_id: record}`` (last line wins).
-
-    Each record carries the prebuilt localize prompt (``localize_prompt`` messages)
-    plus its ``localize_clean_code`` frame, written during repair by
-    ``backbones._purellm_localize`` and replayed by ``--localize-only``."""
     out: dict[str, dict[str, Any]] = {}
     if not path or not os.path.exists(path):
         return out
@@ -377,11 +336,6 @@ def load_localize_prompts(path: str | None) -> dict[str, dict[str, Any]]:
 
 
 def upsert_localize_prompts(path: str, records: list[dict[str, Any]]) -> None:
-    """Write localize-prompt records, OVERWRITING any existing entry for the same
-    ``task_id`` (so a fresh repair run refreshes a stale prompt). The whole file is
-    rewritten once under the lock: existing entries are loaded, new records win, and
-    everything is flushed back. Unlike ``append_localize_records`` (which skips
-    duplicates), this is an upsert — built for prompt refresh."""
     if not path or not records:
         return
     with _LOCALIZE_WRITE_LOCK:
@@ -406,23 +360,6 @@ def localize_batch(
     opt,
     make_call: bool = True,
 ) -> list[dict[str, Any]]:
-    """Localize every task in one batched LLM call, using its method-specific signal.
-
-    ``sources[i]`` is the program to predict line numbers against (the candidate
-    being repaired). ``signals[i]`` is a dict describing the method's signal:
-
-        {"text": <str signal block, "" for naive/cot>,
-         "annotated_code": <str | None, assertrepair only>,
-         "reach_satisfy": <dict | None, assertrepair only>}
-
-    The repair method is read from ``opt.method``. One record per ``task_id`` (first
-    occurrence wins; tasks already in ``opt.localize_path`` are skipped, so resume
-    does not re-localize). Records are appended to ``localize.jsonl`` and returned.
-
-    ``make_call=False`` (--skip-localize): BUILD the prompts but make NO LLM call and
-    write NO localize.jsonl — each returned record carries only ``final_localize_prompt``
-    and its ``clean_code`` frame, which the caller stashes into generation.jsonl for a
-    later ``--localize-only`` replay (see ``localize_from_saved``)."""
     path = getattr(opt, "localize_path", None)
     method = getattr(opt, "method", "naive")
     # In build-only mode we neither consult nor write localize.jsonl (the prompt is
@@ -529,14 +466,6 @@ def localize_from_saved(
     backend,
     opt,
 ) -> list[dict[str, Any]]:
-    """``--localize-only``: run ONLY the localize LLM call from already-built messages
-    (saved into generation.jsonl by ``--skip-localize``), parse the prediction against
-    ``clean_codes[i]``, and append to localize.jsonl.
-
-    Mirrors ``localize_batch``'s record schema for the fields recoverable without the
-    original signal (the method-specific signal text / violated specs are NOT re-derived
-    here — only the prediction frame is needed to replay). One record per ``task_id``;
-    tasks already present in ``opt.localize_path`` are skipped (resume-safe)."""
     path = getattr(opt, "localize_path", None)
     method = getattr(opt, "method", "naive")
     done = _existing_task_ids(path)
