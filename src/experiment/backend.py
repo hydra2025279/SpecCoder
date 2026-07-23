@@ -14,11 +14,6 @@ if str(PROJECT_ROOT) not in sys.path:
 
 
 def add_backend_args(parser: argparse.ArgumentParser, *, include_model: bool = True) -> None:
-    """Shared model/backend CLI surface for every experiment script.
-
-    Set ``include_model=False`` when the caller exposes the model under a
-    different flag (e.g. ``--regen_model``); the caller is then responsible for
-    setting ``opt.model`` and ``opt.speccoder_finetune`` before ``make_backend``."""
     parser.add_argument("--backend", choices=["vllm"], default="vllm")
     if include_model:
         parser.add_argument("--model", required=True, help="HF id / local path (vllm)")
@@ -41,7 +36,6 @@ def add_backend_args(parser: argparse.ArgumentParser, *, include_model: bool = T
 
 
 class _CoalesceItem:
-    """One pending single-prompt ``chat`` call waiting to be merged into a batch."""
 
     __slots__ = ("messages", "num_samples", "task_id", "result", "exc", "done")
 
@@ -55,20 +49,6 @@ class _CoalesceItem:
 
 
 class _ChatCoalescer:
-    """Merge concurrent single-prompt ``chat`` calls into batched dispatches.
-
-    Methods like HoarePrompt annotation fire MANY small, sequentially-dependent LLM
-    calls per task. Running tasks in parallel threads makes those calls overlap, but
-    each call alone is a batch-of-1 — useless for an in-process vLLM engine (whose
-    ``llm.generate`` is single-threaded and unsafe to call concurrently). This
-    coalescer collects whatever single-prompt calls are in flight
-    across the worker threads and dispatches them as ONE batch to ``backend._chat_impl``:
-
-      * vLLM — a single ``llm.generate([...])`` on the dispatcher thread, so the
-               engine runs continuous batching and is never touched concurrently.
-
-    A single dispatcher thread owns every real call, so token accounting and the engine
-    stay single-threaded; per-task attribution rides on each item's explicit ``task_id``."""
 
     def __init__(self, backend, max_batch: int, max_wait: float):
         self.backend = backend
@@ -157,9 +137,6 @@ class ChatBackend:
             self.token_usage = {"input": 0, "output": 0, "calls": 0}
             self.token_by_task: dict[str, dict[str, int]] = {}
             self._cur_task = None
-            # Per-thread current task: parallel per-task methods (parallel HoarePrompt
-            # annotation) each call begin_task in their own worker thread, so the active
-            # task must be thread-local, not a single shared attribute that races.
             self._tls = threading.local()
             self._usage_lock = threading.Lock()
 
@@ -304,13 +281,6 @@ class VLLMBackend(ChatBackend):
 
 
 def write_token_files(backend: ChatBackend, out_dir, allowed_task_ids=None) -> None:
-    """Write ``token.jsonl`` (one row per task) and ``token_total.json``.
-
-    ``token.jsonl`` keeps EVERY row (merged with any prior run — non-destructive).
-    When ``allowed_task_ids`` is given (e.g. the current humanexec task set), the
-    totals in ``token_total.json`` are computed ONLY over rows whose ``task_id`` is in
-    that set — so a shrunk benchmark doesn't keep counting stale tasks from a larger run.
-    """
     import json
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -348,17 +318,6 @@ def write_token_files(backend: ChatBackend, out_dir, allowed_task_ids=None) -> N
 
 def append_token_records(out_dir, records, *, with_attempt: bool = True, filename_suffix: str = "",
                           allowed_task_ids=None) -> None:
-    """Per-record token accounting that mirrors ``generation.jsonl``: ONE appended
-    line per record, never overwritten, sourced from each record's ``cost_token``
-    (``{prompt_tokens, response_tokens, total_tokens}``).
-
-    * ``with_attempt=True``  (repair): one line per ``(task_id, attempt)``.
-    * ``with_attempt=False`` (localize): one line per ``task_id``.
-
-    Already-written rows are kept and de-duplicated, so re-running with a larger
-    ``--num-samples`` only APPENDS the new attempts (it never rewrites or loses the
-    earlier ones). ``token_total.json`` is RECOMPUTED from the full ``token.jsonl``
-    on every call."""
     import json
 
     out = Path(out_dir)
@@ -399,8 +358,6 @@ def append_token_records(out_dir, records, *, with_attempt: bool = True, filenam
                 f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
     rows = existing_rows + new_rows
-    # token{suffix}.jsonl keeps every row; the totals optionally restrict to the
-    # current dataset (allowed_task_ids) so a shrunk benchmark stops counting stale tasks.
     allowed = None if allowed_task_ids is None else {str(t) for t in allowed_task_ids}
     counted = [r for r in rows if allowed is None or str(r.get("task_id")) in allowed]
     total_in = sum(int(r.get("input_token", 0)) for r in counted)
@@ -418,7 +375,6 @@ def append_token_records(out_dir, records, *, with_attempt: bool = True, filenam
 
 
 def make_backend(opt) -> ChatBackend:
-    """Build the persistent backend selected by ``opt.backend``."""
     if opt.backend == "vllm":
         return VLLMBackend(opt)
     raise SystemExit(f"SpecCoder experiments support only --backend vllm, got {opt.backend!r}")
