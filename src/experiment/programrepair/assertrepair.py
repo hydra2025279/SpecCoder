@@ -26,9 +26,6 @@ ANALYSIS_SYSTEM = (
 
 
 def format_specs(violated: list[alpha_beta.SpecReachSatisfy]) -> str:
-    """Render the violated specs as a bulleted list (lowest satisfy-rate first). The buggy
-    listing is shown without line numbers, so each spec is anchored by its `# assert <expr>`
-    text (which appears inline in the code), not a checkpoint line number."""
     return "\n".join(f"- `# assert {s.expr}`" for s in violated)
 
 
@@ -48,8 +45,6 @@ def format_reach_satisfy_report(result) -> str:
 
 
 def _evidence_phrase(s) -> str:
-    """Plain-language execution evidence for one checkpoint: how many executions (over ALL
-    tests) reach it and how many satisfy the assertion."""
     return (
         f"(reached by {s.reach} execution(s), of which {s.satisfy} satisfy the assertion "
         f"and {s.reach - s.satisfy} do not)"
@@ -57,10 +52,6 @@ def _evidence_phrase(s) -> str:
 
 
 def _match_assert_spec(expr_text: str, specs_by_len: list[Any]):
-    """Find the spec whose assert content matches an `# assert` line's expression text.
-    Matches when the canonical ``s.expr`` equals ``expr_text`` or is a PREFIX of it ending
-    at a boundary (whitespace / ``#`` / ``(``); prefers the LONGEST such expr. ``specs_by_len``
-    must be sorted longest-expr first."""
     for s in specs_by_len:
         e = s.expr.strip()
         if not e:
@@ -73,9 +64,6 @@ def _match_assert_spec(expr_text: str, specs_by_len: list[Any]):
 
 
 def _annotate_with_reach_satisfy(annotated: str, result) -> str:
-    """REPLACE each checkpoint's `# assert` line with
-    ``<indent># assert <expr>  (reached by …)`` so the execution evidence — how many
-    executions reach it and how many satisfy it — is inlined for EVERY spec. Idempotent."""
     if not annotated or result is None or not getattr(result, "specs", None):
         return annotated
     specs_by_len = sorted(result.specs, key=lambda s: len(s.expr.strip()), reverse=True)
@@ -115,15 +103,6 @@ _GUIDE_BODY = (
 
 def format_checkpoint_analysis(result, violated: list[alpha_beta.SpecReachSatisfy],
                                show_line: bool = False) -> str:
-    """Classify every checkpoint by its reach/satisfy evidence over ALL tests (no pass/fail):
-
-      VIOLATED        — reached by some execution but not satisfied by all of them. The bug
-                        most likely sits on the path leading UP TO this assert. Highest priority.
-      ALWAYS-SATISFIED— reached and satisfied by every execution. The captured state is intact
-                        here; the bug is probably elsewhere.
-      NEVER-REACHED   — no execution reaches it. The code path is never exercised by any test;
-                        the bug may be why it is unreachable.
-    """
     specs = list(getattr(result, "specs", []) or [])
     if not specs:
         return ""
@@ -163,9 +142,6 @@ def format_checkpoint_analysis(result, violated: list[alpha_beta.SpecReachSatisf
 
 def build_analysis_prompt(sample, candidate: str, violated: list[alpha_beta.SpecReachSatisfy],
                           rs_result=None, annotated_code: str | None = None) -> str:
-    """Reviewer-style analysis prompt: present the buggy program with its `# assert`
-    checkpoints, then a subsection analysing which executions reach and satisfy each
-    checkpoint. Ask for a bug ANALYSIS + fix ADVICE (no code)."""
     listing = annotated_code or candidate
     analysis = format_checkpoint_analysis(rs_result, violated, show_line=False)
     analysis_block = (
@@ -261,16 +237,6 @@ def repair_feedback_messages(sample, candidate: str, feedback: str) -> list[dict
 
 
 def improve_batch(samples, buggys, candidates, backend, opt, states) -> list[tuple[str, dict[str, Any]]]:
-    """assertrepair signal (batched).
-
-    For every candidate: generate inline `# assert` specs ONCE, execute the annotated
-    program on EVERY test once to get per-checkpoint reach/satisfy counts, keep the
-    violated checkpoints, run a reviewer-style ANALYSIS over them, then a single repair
-    generation. It uses reach/satisfy evidence over the available tests.
-
-    Spec generation is retried up to ``--spec-regen`` rounds (default 5): a task "fails"
-    when the model returns no parseable inline `# assert`, and only the still-failing
-    subset is re-generated (batched in parallel) each round."""
     n = len(samples)
     t0 = time.perf_counter()
     eval_workers = common.test_batch_of(opt)
