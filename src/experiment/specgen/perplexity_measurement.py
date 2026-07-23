@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import argparse
@@ -20,46 +19,31 @@ if PROJECT_ROOT is None:
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from SpecCoder.spec_utils import parse_assert_comment  # noqa: E402
-from SpecCoder.src.experiment.gen_utils import (  # noqa: E402
+from SpecCoder.spec_utils import parse_assert_comment  
+from SpecCoder.src.experiment.gen_utils import ( 
     GENERATION_FILE, append_jsonl, load_vllm, model_slug, write_json,
 )
-from SpecCoder.src.experiment.specgen.inline.prompt import (  # noqa: E402
+from SpecCoder.src.experiment.specgen.inline.prompt import ( 
     SYSTEM_PROMPT, build_spec_generation_prompt,
 )
 
 SYSTEM_PROMPT_DEFAULT = SYSTEM_PROMPT
-# problem_description, from which we rebuild the spec-generation prompt below).
 DEFAULT_REFERENCE = str(PROJECT_ROOT / "SpecCoder" / "data" / "candidates_heldout.jsonl")
 SOLUTION_CLOSE = "</solution>"
 
 
 def strip_explanation(text: str) -> str:
-    """Return only the answer portion of a ground_truth_response (the
-    ``<solution>...</solution>`` block), dropping the trailing explanation. For
-    causal scoring this changes nothing about the assert tokens — the explanation
-    comes after them — but it avoids spending a forward pass on explanation tokens
-    and prevents any ``# assert`` mentioned in the prose from being mis-counted.
-    Falls back to returning the text unchanged when there is no solution wrapper
-    (e.g. a generic ``annotated_code`` field)."""
     idx = text.rfind(SOLUTION_CLOSE)
     return text[: idx + len(SOLUTION_CLOSE)] if idx != -1 else text
 
 
-# --------------------------------------------------------------------------- #
-# Locating `# assert` lines and their character spans inside annotated_code.
-# --------------------------------------------------------------------------- #
 def assert_spans(annotated_code: str) -> list[dict[str, Any]]:
-    """Return one entry per ``# assert`` line: its char span within
-    ``annotated_code`` and the parsed expression. ``dedup_key`` counts repeated
-    identical expressions (same convention as the spec-quality extractor)."""
     spans: list[dict[str, Any]] = []
     seen: dict[str, int] = {}
     cursor = 0
     for line in annotated_code.splitlines(keepends=True):
         expr = parse_assert_comment(line.rstrip("\n"))
         if expr is not None:
-            # char span of the line content (without the trailing newline)
             content_len = len(line.rstrip("\n"))
             key = f"assert {expr}"
             dedup = seen.get(key, 0)
@@ -75,10 +59,6 @@ def assert_spans(annotated_code: str) -> list[dict[str, Any]]:
     return spans
 
 
-# --------------------------------------------------------------------------- #
-# vLLM scoring: one engine, scored under base (lora_request=None) and the
-# fine-tuned adapter (lora_request=...), via prompt_logprobs.
-# --------------------------------------------------------------------------- #
 def build_prompt_str(tokenizer, user_prompt: str, system_prompt: str) -> str:
     """The chat-formatted prefix up to (and including) the assistant turn start."""
     messages = []
@@ -93,12 +73,6 @@ def build_prompt_str(tokenizer, user_prompt: str, system_prompt: str) -> str:
 
 
 def _vllm_score_batch(llm, batch_token_ids: list[list[int]], lora_request):
-    """Teacher-force a whole BATCH of token-id sequences in ONE ``llm.generate``
-    call and return the list of RequestOutputs (each carrying ``prompt_logprobs``),
-    aligned 1:1 with the input order. Passing token ids (not text) keeps them in
-    lockstep with our offset mapping. ``max_tokens=1`` because some vLLM builds
-    reject 0. Same batched pattern as spec generation (one generate call per
-    batch)."""
     from vllm import SamplingParams
 
     sp = SamplingParams(max_tokens=1, temperature=0.0, prompt_logprobs=1)
@@ -112,8 +86,6 @@ def _vllm_score_batch(llm, batch_token_ids: list[list[int]], lora_request):
 
 
 def _logprob_value(entry, token_id):
-    """Extract the logprob of ``token_id`` from a vLLM prompt_logprobs entry
-    (dict[int, Logprob])."""
     if not entry:
         return None
     obj = entry.get(token_id)
@@ -123,10 +95,6 @@ def _logprob_value(entry, token_id):
 
 
 def tokenize_sequence(tokenizer, prompt_str: str, target_str: str) -> dict[str, Any]:
-    """Tokenize the (prompt + target) sequence once, returning the token ids,
-    char offsets and the prompt char-length. Model-independent: the base model and
-    its LoRA adapter share this tokenizer, so we compute it once per task and reuse
-    it for both, then feed the token ids into the batched vLLM scorer."""
     full = prompt_str + target_str
     enc = tokenizer(full, return_offsets_mapping=True, add_special_tokens=False)
     return {
@@ -138,9 +106,6 @@ def tokenize_sequence(tokenizer, prompt_str: str, target_str: str) -> dict[str, 
 
 
 def aggregate_scores(out, tok: dict[str, Any], spans: list[dict[str, Any]]) -> dict[str, Any]:
-    """Turn one vLLM RequestOutput (carrying ``prompt_logprobs``) into per-target-token
-    NLL plus per-assert / overall aggregates. Only target tokens (those whose char
-    offset lies in the target region) contribute."""
     token_ids = tok["token_ids"]
     offsets = tok["offsets"]
     prompt_len = tok["prompt_len"]
@@ -304,7 +269,6 @@ def run(opt: argparse.Namespace) -> None:
     if need_lora and not opt.lora_path:
         raise SystemExit("Scoring the finetuned model requires --lora_path")
 
-    # Decide up front which tasks still need scoring (resume per model folder).
     ppl_paths = {w: os.path.join(variant_dir(out_root, opt, w), "perplexity.jsonl") for w in models_to_score}
     done_by_model = {w: load_done_task_ids(ppl_paths[w]) for w in models_to_score}
     pending_any = any(
@@ -314,15 +278,12 @@ def run(opt: argparse.Namespace) -> None:
     )
 
     if pending_any:
-        # One vLLM engine; base scored with lora_request=None, finetune with lora_request.
         llm, tokenizer, lora_request = load_vllm(
             opt.model, lora_path=opt.lora_path, speccoder_finetune=need_lora,
             max_model_len=opt.max_model_len, tensor_parallel_size=opt.tensor_parallel_size,
             gpu_memory_utilization=opt.gpu_memory_utilization, cache_dir=opt.cache_dir,
         )
         lora_by_model = {"base": None, "finetune": lora_request}
-        # Tokenize each task ONCE (tokenizer is shared by base + its LoRA adapter);
-        # reuse the token ids for every model and feed them to the batched scorer.
         for item in prepared:
             item["prompt_str"] = build_prompt_str(tokenizer, item["user_prompt"], item["system_prompt"])
             item["tok"] = tokenize_sequence(tokenizer, item["prompt_str"], item["annotated_code"])
@@ -347,7 +308,6 @@ def run(opt: argparse.Namespace) -> None:
     else:
         print("All tasks already scored for the requested model(s); writing summary only.")
 
-    # ---- summary (re-read each model's perplexity.jsonl, join for delta) -------
     by_model_records = {w: load_perplexity_jsonl(ppl_paths[w]) for w in models_to_score}
     summary: dict[str, Any] = {
         "reference": ref_path, "model": opt.model, "lora_path": opt.lora_path,
