@@ -119,17 +119,6 @@ class _ChatCoalescer:
 
 
 class ChatBackend:
-    """Interface: ``chat(messages_list, num_samples=None, task_ids=None) -> list[list[str]]``.
-
-    Every backend accumulates real token usage on EVERY LLM call (central token
-    accounting). Attribute a call to a task either by passing ``task_ids`` to
-    ``chat`` (one per message, for batched calls) or by calling ``begin_task`` before
-    a block of calls (for per-task / nested-call methods such as HoarePrompt).
-
-    Subclasses implement ``_chat_impl`` (the real batched call); the base ``chat``
-    routes single-prompt calls through an optional coalescer (see
-    :meth:`enable_coalescing`) so parallel per-task methods batch automatically."""
-
     _coalescer: "_ChatCoalescer | None" = None
 
     def _ensure_tokens(self):
@@ -161,11 +150,6 @@ class ChatBackend:
                 d["calls"] += 1
 
     def _tid_for(self, task_ids, i):
-        """Resolve the task id for message ``i``: the explicit ``task_ids`` entry
-        (batched calls) or, failing that, the ``begin_task`` context (per-task
-        methods such as HoarePrompt that don't pass task_ids on each call). The
-        ``begin_task`` context is read thread-locally first so parallel annotation
-        workers don't read each other's task."""
         if task_ids and i < len(task_ids) and task_ids[i] is not None:
             return task_ids[i]
         tls = getattr(self, "_tls", None)
@@ -191,12 +175,6 @@ class ChatBackend:
             c.stop()
 
     def chat(self, messages_list, num_samples=None, task_ids=None, use_lora=True):
-        """Public entry. When coalescing is active, a single-prompt call is queued and
-        merged with other in-flight calls; otherwise it goes straight to ``_chat_impl``.
-        Batched calls (len > 1) always dispatch directly — they are already a batch.
-
-        ``use_lora=False`` forces the BASE model (vllm: drops the LoRA adapter) and ALWAYS
-        bypasses the coalescer, so base-model calls are never merged with LoRA calls."""
         c = self._coalescer
         if use_lora and c is not None and len(messages_list) == 1:
             tid = task_ids[0] if task_ids else self._tid_for(None, 0)
