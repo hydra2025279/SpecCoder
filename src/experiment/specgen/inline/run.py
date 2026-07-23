@@ -139,11 +139,6 @@ def oracle_source_solution(row: dict[str, Any]) -> str:
 
 
 def compact_quality_summary(quality: dict[str, Any]) -> dict[str, Any]:
-    """Small public summary schema for spec-generation runs.
-
-    ``spec_quality.json`` keeps the detailed task/assertion data. ``summary.json``
-    is intentionally compact and uses the paper-facing metric names.
-    """
     aliases = {
         "avg_inline_correctness": ("avg_inline_correctness", "macro_task_correctness", "avg_correctness"),
         "avg_inline_completeness": ("avg_inline_completeness", "macro_task_completeness", "avg_completeness"),
@@ -217,8 +212,6 @@ def run_oracle(opt: argparse.Namespace) -> None:
 
     if opt.eval_only and opt.no_eval:
         raise SystemExit("--eval-only conflicts with --no-eval")
-    # Evaluation runs by default (full = generate + eval). --no-eval skips it;
-    # --eval-only skips generation and evaluates the existing generation.jsonl.
     opt.eval = not opt.no_eval
     if opt.eval_only:
         print("--eval-only set: skipping generation and evaluating existing generation.jsonl")
