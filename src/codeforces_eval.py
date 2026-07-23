@@ -183,22 +183,11 @@ def run_one_case(
         encoding="utf-8",
         errors="replace",
         preexec_fn=limit_child_process(config.memory_mb, config.timeout),
-        # NOTE: do not set start_new_session here. limit_child_process() already
-        # calls os.setsid() in the child (when on the main thread); setting
-        # start_new_session=True would make CPython call setsid() a second time
-        # -> EPERM raised inside preexec_fn. When set_limits is skipped (off the
-        # main thread) the child is simply not a group leader, and the timeout
-        # handler below falls back to process.kill().
     )
 
     try:
         stdout, stderr = process.communicate(input_text, timeout=config.timeout)
     except subprocess.TimeoutExpired:
-        # Kill the child. If set_limits put it in its OWN process group (it called
-        # os.setsid()), nuke the whole group so any grandchildren die too. But when
-        # set_limits was skipped (off the main thread) the child shares our process
-        # group -> killpg(getpgid) would SIGKILL this eval process itself, so in that
-        # case fall back to killing the single pid. Never let the kill crash the eval.
         try:
             if os.name == "posix":
                 child_pgid = os.getpgid(process.pid)
