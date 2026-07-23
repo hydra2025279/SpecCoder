@@ -11,7 +11,6 @@ from SpecCoder.src.experiment.programrepair import common
 
 NAME = "hoareprompt"
 
-# HoarePrompt uses flat imports (``from model import ...``); put its src on path.
 _HP_SRC = common.PROJECT_ROOT / "SpecCoder" / "others" / "HoarePrompt" / "src"
 
 
@@ -25,7 +24,6 @@ def improve(sample, buggy, candidate, backend, opt, state) -> tuple[str, dict[st
 
 
 def improve_batch(samples, buggys, candidates, backend, opt, states) -> list[tuple[str, dict[str, Any]]]:
-    """HoarePrompt barriers: annotate the whole batch, then repair the whole batch."""
     _ensure_hp_on_path()
     import model as hp_model  # noqa: E402
     import repair_entry  # noqa: E402
@@ -40,16 +38,6 @@ def improve_batch(samples, buggys, candidates, backend, opt, states) -> list[tup
     postconditions = [""] * n
     errors: list[str | None] = [None] * n
 
-    # Milestone 1: every task completes annotation before any final repair starts.
-    # Each task's annotation is a sequential chain of ~16 internal LLM calls, but tasks
-    # are INDEPENDENT (own tempdir, own state), so we run the WHOLE batch concurrently:
-    # one annotation chain per task in this batch (``workers = n``, i.e. it follows the
-    # active batch — the --global-batch chunk for purellm, or the live subset for
-    # agentcoder/chatrepair — no separate knob). The concurrency itself is what lets the
-    # backend batch: parallel workers' in-flight calls are coalesced into one dispatch
-    # (vLLM → a single batched generate on the lone dispatcher thread; API → one
-    # fanned-out _chat_pool). begin_task is thread-local, so token usage stays attributed
-    # per task. A single-task batch (n == 1) takes the old sequential path byte-for-byte.
     workers = n
     common.progress("hoareprompt", f"annotation milestone on {n} task(s)"
                     + (f" ({workers} parallel)" if workers > 1 else ""))
