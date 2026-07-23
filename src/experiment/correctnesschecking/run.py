@@ -186,12 +186,6 @@ def ensure_specs_generated(
     opt: argparse.Namespace,
     spec_file: str,
 ) -> None:
-    """Ensure spec generation output covers all needed tasks.
-
-    - All tasks already in spec_file → nothing to do (skip to checking).
-    - Some tasks present → invoke spec gen to append the missing ones.
-    - No spec_file at all → generate from scratch.
-    """
     needed_source_ids = {t["source_task_id"] for t in tasks}
     existing = load_spec_generation_by_task(spec_file)  # empty dict if file missing
     covered = needed_source_ids & set(existing)
@@ -513,7 +507,6 @@ def run_speccoder_from_spec_file(
 
 def run_speccoder(tasks: list[dict[str, Any]], backend, opt: argparse.Namespace, generation_path: str) -> list[dict[str, Any]]:
     spec_file = opt.spec_file or default_spec_file(opt)
-    # Smart spec generation: generate/append missing specs instead of hard-exiting.
     ensure_specs_generated(tasks, opt, spec_file)
     if not os.path.exists(spec_file):
         raise SystemExit(f"Spec generation failed — file still missing: {spec_file}")
@@ -643,9 +636,7 @@ def run_hoareprompt(tasks: list[dict[str, Any]], backend, opt: argparse.Namespac
                   f"-> {'CORRECT' if prediction else 'buggy'}"
                   + (f"  (error: {error})" if error else ""), flush=True)
 
-    # Process pending tasks in chunks of --global-batch; within a chunk, assess every task
-    # concurrently with the coalescer ON. A 1-task chunk / a backend without coalescing
-    # takes the sequential path (byte-for-byte the old behaviour).
+
     batch_size = max(1, int(getattr(opt, "global_batch", 0) or 1))
     for start in range(0, len(pending), batch_size):
         chunk = pending[start:start + batch_size]
