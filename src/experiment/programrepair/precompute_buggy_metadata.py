@@ -10,10 +10,9 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
-# Allow running as a file: make the repo root importable so ``SpecCoder...`` works.
 _THIS = os.path.abspath(__file__)
 _ROOT = _THIS
-for _ in range(4):  # .../SpecCoder/src/experiment/programrepair/<file> -> repo root above SpecCoder
+for _ in range(4): 
     _ROOT = os.path.dirname(_ROOT)
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
@@ -21,13 +20,10 @@ if _ROOT not in sys.path:
 from SpecCoder.src.codeforces_eval import calculate_pass_rate  # noqa: E402
 from SpecCoder.src.experiment.programrepair import common  # noqa: E402
 
-# Same memory policy as common.evaluate (no RLIMIT on macOS, 512MB cap on Linux).
 _EVAL_MEMORY_MB = None if sys.platform == "darwin" else 512
 
 
 def compute_metadata(sample: dict[str, Any], timeout: float, test_workers: int) -> dict[str, Any]:
-    """Evaluate ``buggy_solution`` on the real ``test_cases`` and return the
-    ``buggy_metadata`` block (mirrors common.evaluate's eval settings)."""
     code = sample.get("buggy_solution") or ""
     result = calculate_pass_rate(
         code,
