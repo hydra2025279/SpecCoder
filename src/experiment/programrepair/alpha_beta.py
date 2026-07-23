@@ -33,7 +33,6 @@ DEFAULT_PARALLELISM = 16
 
 @dataclass
 class SpecAlphaBeta:
-    """Alpha/beta signal for a single inline ``# assert`` checkpoint."""
 
     trace_key: str
     assert_key: str
@@ -129,10 +128,6 @@ def _trace_correctness(
     timeout: int,
     parallelism: int,
 ) -> dict[str, dict[str, Any]]:
-    """EXECUTION-level correctness: a checkpoint may be hit many times inside one
-    test, and every hit counts. We SUM the per-test reach/pass counts across all
-    tests, so a test whose loop reaches the checkpoint 100 times contributes 100
-    executions (not 1). correctness = satisfying executions / total executions."""
     trace_keys = list(spec_dict)
     reach_counts = {k: 0 for k in trace_keys}
     pass_counts = {k: 0 for k in trace_keys}
@@ -174,12 +169,6 @@ def compute_alpha_beta(
     parallelism: int = DEFAULT_PARALLELISM,
     pass_fail: tuple[list[dict[str, str]], list[dict[str, str]]] | None = None,
 ) -> AlphaBetaResult:
-    """Compute alpha/beta for every inline ``# assert`` in ``annotated_code``.
-
-    ``pass_fail`` lets the caller supply the (passed, failed) test split ONCE — it is
-    computed from the program being repaired (the candidate) BEFORE spec generation
-    and reused across every spec-retry, instead of re-running the tests inside each
-    α/β call. When ``None`` the split is computed here from the annotated code's body."""
     cleaned, assertions = extract_assertions_from_annotated_code(annotated_code)
     if pass_fail is not None:
         passed, failed = pass_fail
@@ -229,19 +218,6 @@ def select_violated_specs(
     alpha_threshold: float = 0.9,
     beta_threshold: float = 1.0,
 ) -> list[SpecAlphaBeta]:
-    """USEFUL repair signals: consistent on passing behaviour (alpha >= threshold)
-    and discriminative on buggy behaviour (beta < threshold). With the 0/0
-    conventions (alpha 0/0=1, beta 0/0=0) this admits, besides the classic
-    reached-and-violated case, two more:
-
-      - PASS-ONLY: no failing test reaches the checkpoint (beta=0) while passing
-        tests do and satisfy it (alpha>=thr) -> the bug is UPSTREAM of it;
-      - FAIL-ONLY: no passing test reaches it (alpha=1) and the failing runs do
-        not satisfy it (beta<thr).
-
-    A fully DEAD checkpoint (no test execution reaches it at all) carries no
-    behavioural evidence and is excluded. Most-discriminative first (lowest beta,
-    then earliest checkpoint)."""
     out = [
         s for s in specs
         if s.alpha >= alpha_threshold
@@ -253,10 +229,6 @@ def select_violated_specs(
 
 
 def specs_from_dicts(spec_dicts: list[dict[str, Any]]) -> list[SpecAlphaBeta]:
-    """Rebuild :class:`SpecAlphaBeta` objects from a saved ``alpha_beta["specs"]`` list
-    (each produced by :meth:`SpecAlphaBeta.to_dict`). Used by the ablation reuse path:
-    α/β were already computed once at the default thresholds, so a new (α, β) sweep
-    only needs to RE-SELECT from these stored values — no test execution / tracing."""
     out: list[SpecAlphaBeta] = []
     for d in spec_dicts or []:
         out.append(SpecAlphaBeta(
@@ -309,10 +281,6 @@ def one_spec_per_checkpoint(violated: list[SpecAlphaBeta]) -> list[SpecAlphaBeta
 
 @dataclass
 class SpecReachSatisfy:
-    """Reach/satisfy signal for one inline ``# assert`` checkpoint, computed over ALL
-    test cases as a single group — no passing/failing split, no α/β. EXECUTION-level:
-    a checkpoint hit many times inside one test contributes every hit."""
-
     trace_key: str
     assert_key: str
     expr: str
@@ -364,11 +332,6 @@ def compute_reach_satisfy(
     memory_mb: int | None = 512,
     parallelism: int = DEFAULT_PARALLELISM,
 ) -> ReachSatisfyResult:
-    """assertrepair engine: run the annotated buggy program on EVERY test (no pass/fail
-    split, no initial test run) and, per ``# assert`` checkpoint, count how many
-    EXECUTIONS reach it and how many satisfy it. A checkpoint is VIOLATED when it is
-    reached by some execution but not satisfied by all of them. Returns one violated
-    spec per checkpoint line (lowest satisfy-rate first)."""
     cleaned, assertions = extract_assertions_from_annotated_code(annotated_code)
     cases = normalize_test_cases(test_cases)
     if not assertions:
@@ -433,7 +396,6 @@ def extract_annotated(response: str) -> str | None:
 if __name__ == "__main__":
     import json
 
-    # Buggy "a + b": the program prints a - b. Tests with b == 0 pass; others fail.
     annotated = (
         "a, b = map(int, input().split())\n"
         "# assert b >= 0\n"
