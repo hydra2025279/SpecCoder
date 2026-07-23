@@ -57,10 +57,6 @@ def parse_task_ids(raw) -> list[str]:
 
 
 def select_task_ids(rows: list[dict[str, Any]], task_ids) -> list[dict[str, Any]]:
-    """Keep only rows whose ``task_id`` is in ``task_ids`` (preserving the order the ids
-    were given). Used by ``--task-ids``: when set it overrides --limit/--start/--end and
-    processes exactly those tasks, so batching no longer matters. Raises if an id matches
-    no row, so a typo fails loudly instead of silently running nothing."""
     wanted = parse_task_ids(task_ids)
     if not wanted:
         return rows
@@ -79,8 +75,6 @@ def select_task_ids(rows: list[dict[str, Any]], task_ids) -> list[dict[str, Any]
 
 
 def buggy_code_of(sample: dict[str, Any]) -> str:
-    """The program to repair: paired schema ``buggy_solution`` (fall back to the
-    legacy single-submission ``code`` field)."""
     return sample.get("buggy_solution") or sample.get("code", "") or ""
 
 
@@ -115,8 +109,6 @@ def problem_text(sample: dict[str, Any], max_examples: int = 3) -> str:
 
 
 def build_repair_prompt(sample: dict[str, Any], buggy_code: str, feedback: str = "") -> str:
-    """Base PatchGenerator prompt. ``feedback`` (test failures, a HoarePrompt
-    verdict, assertion evidence, a review, etc.) is injected by the method when present."""
     feedback_section = f"\n### Feedback\n{feedback.strip()}\n" if feedback.strip() else ""
     return f"""Task: repair the buggy Python program so it satisfies the problem specification and passes the tests.
 Use only the provided specification, examples, and buggy code. Preserve the required stdin/stdout interface.
@@ -152,12 +144,6 @@ def repair_conversation_messages(
     messages: list[dict[str, str]],
     state: dict[str, Any] | None,
 ) -> list[dict[str, str]]:
-    """Attach ChatRepair's repair-only conversation to a new final repair prompt.
-
-    Signal-generation calls are deliberately excluded. The history contains only
-    prior final repair prompts and their assistant responses. Other backbones do not
-    enable repair conversation state and therefore receive messages unchanged.
-    """
     current = [dict(message) for message in messages]
     if not state or not state.get("_repair_conversation_enabled"):
         return current
@@ -181,7 +167,6 @@ def remember_repair_exchange(
 
 
 def format_chat_messages(messages: list[dict[str, str]]) -> str:
-    """Readable representation of the exact messages sent to a chat backend."""
     return "\n\n".join(
         f"[{str(message.get('role', '')).upper()}]\n{message.get('content', '')}"
         for message in messages
@@ -203,9 +188,6 @@ def timed_chat_batched(
     task_ids=None,
     use_lora: bool = True,
 ) -> tuple[list[list[str]], list[dict[str, Any]]]:
-    """``use_lora=False`` forces the BASE model for this call even when a SpecCoder LoRA
-    adapter is loaded (vllm only) — used so analysis/repair run on the base model while
-    only spec generation uses the fine-tuned verifier. No-op for non-LoRA backends."""
     batch_size = int(getattr(opt, "global_batch", 0) or getattr(opt, "task_batch_size", 0) or 0)
     if batch_size <= 0:
         chunks = [messages]
@@ -273,8 +255,6 @@ def evaluate(code: str, sample: dict[str, Any], timeout: float, test_workers: in
 
 
 def format_failures(result: dict[str, Any], cases: list[dict[str, str]], max_failures: int = 2) -> str:
-    """Render a few failing cases from a ``calculate_pass_rate`` result into a
-    compact feedback block (input / expected / actual / error)."""
     parts = [
         f"The program passed {result.get('passed_tests', 0)}/{result.get('total_tests', 0)} tests."
     ]
@@ -307,7 +287,6 @@ def format_failures(result: dict[str, Any], cases: list[dict[str, str]], max_fai
 
 
 def render_transcript(rounds: list[dict[str, Any]]) -> str:
-    """Flatten a per-round refinement history into one log string."""
     out: list[str] = []
     for r in rounds:
         out.append(f"--- round {r.get('round')} | ok={r.get('ok')} ---")
@@ -340,20 +319,11 @@ _STEP = {"label": ""}
 
 
 def progress(tag: str, msg: str) -> None:
-    """Single-line progress log to stdout (flushed) so long batched runs show which
-    method/backbone step is executing. ``tag`` is a short scope like the method name
-    or backbone+iter; ``msg`` describes the step and how many tasks it covers.
-
-    Also records the CURRENT step label, which the backend reads to (a) title the
-    per-task ``[PROMPT]`` block it writes live at dispatch and (b) label the tqdm
-    progress bar for the call."""
     _STEP["label"] = f"{tag}: {msg}" if tag else str(msg)
     print(f"    [{tag}] {msg}", flush=True)
 
 
 def current_step() -> str:
-    """The label of the step most recently announced via :func:`progress` (used by
-    the backend to title live-logged prompts and the per-step progress bar)."""
     return _STEP["label"]
 
 
@@ -365,8 +335,6 @@ def test_batch_of(opt) -> int:
 
 
 def step_bar(total: int, desc: str | None = None):
-    """A tqdm bar counting completed sub-calls 0→``total`` for the current step.
-    Returns ``None`` if tqdm is unavailable or ``total`` is trivial."""
     if total is None or total <= 1:
         return None
     try:
@@ -389,30 +357,17 @@ def _last_user_content(messages) -> str:
 
 
 def log_call_prompt(task_identifier, messages, step: str | None = None) -> None:
-    """Write the prompt of an LLM call to the task's .log IMMEDIATELY (before the
-    network request), so a long batched step shows its prompts live instead of only
-    after the whole batch returns. No-op when live logging is off, the dispatch log is
-    suppressed (see :func:`suppress_dispatch_log`), or there is no task to attribute
-    the call to."""
     if not _LIVE_LOG["on"] or _SUPPRESS_DISPATCH_LOG["on"] or task_identifier is None:
         return
     live_log(task_identifier, f"{step or current_step()}  [PROMPT @ dispatch]",
              prompt=_last_user_content(messages))
 
 
-# Some methods (e.g. HoarePrompt) make MANY internal LLM calls per task (program
-# executor, if-postcondition, loop-state, functionality …). Dumping every one of those
-# prompts at dispatch floods the per-task repair log (tens of KB of scaffolding) while
-# the method already live-logs its final artifact (the annotated program). Wrap such an
-# internal multi-call section in this context manager to keep the repair log clean.
 _SUPPRESS_DISPATCH_LOG = {"on": False}
 
 
 @contextlib.contextmanager
 def suppress_dispatch_log():
-    """Temporarily silence :func:`log_call_prompt` (the per-dispatch ``[PROMPT @ dispatch]``
-    writes) for nested internal LLM calls. Explicit ``live_log``/``emit`` calls are
-    unaffected, so the method's final artifacts are still recorded."""
     prev = _SUPPRESS_DISPATCH_LOG["on"]
     _SUPPRESS_DISPATCH_LOG["on"] = True
     try:
@@ -420,11 +375,6 @@ def suppress_dispatch_log():
     finally:
         _SUPPRESS_DISPATCH_LOG["on"] = prev
 
-
-# --------------------------------------------------------------------------- #
-# Live per-task logging: write each step (prompt/response/result) to the task's
-# .log file AS IT RUNS, instead of only dumping the whole transcript at eval time.
-# --------------------------------------------------------------------------- #
 import os as _os
 import re as _re
 import threading as _threading
@@ -434,8 +384,6 @@ _LIVE_LOCK = _threading.Lock()
 
 
 def configure_live_log(log_dir: str | None, enabled: bool = True) -> None:
-    """Point live logging at ``log_dir`` (the same per-task ``log/`` folder the eval
-    step uses). Call once before generation; pass ``enabled=False`` to disable."""
     _LIVE_LOG["dir"] = log_dir
     _LIVE_LOG["on"] = bool(enabled and log_dir)
     if _LIVE_LOG["on"]:
@@ -449,9 +397,6 @@ def _live_log_path(task_identifier: str) -> str:
 
 def live_log(task_identifier, name: str, prompt=None, response=None, result=None, it=None,
              header: str | None = None) -> None:
-    """Append one step block to the task's .log immediately (best-effort, never raises).
-    Writes whatever is present: a one-line ``header``, then ``[PROMPT]``/``[RESPONSE]``/
-    ``[RESULT]`` sections. No-op unless ``configure_live_log`` enabled it."""
     if not _LIVE_LOG["on"]:
         return
     parts: list[str] = []
@@ -475,9 +420,6 @@ def live_log(task_identifier, name: str, prompt=None, response=None, result=None
 
 
 def init_task_logs(task_identifiers, header: str | None = None) -> None:
-    """Create/touch the .log file for every task in a batch up-front, so all N task
-    logs exist the moment the batch starts (before any test runs or LLM calls). Each
-    file gets an optional one-line ``header`` block. No-op when live logging is off."""
     if not _LIVE_LOG["on"]:
         return
     for tid in task_identifiers:
@@ -492,8 +434,6 @@ def init_task_logs(task_identifiers, header: str | None = None) -> None:
 
 
 def tqdm_print(line: str) -> None:
-    """Print a line to the terminal WITHOUT corrupting an active tqdm bar (uses
-    ``tqdm.write`` when tqdm is available, else a plain flushed ``print``)."""
     try:
         from tqdm.auto import tqdm
         tqdm.write(line)
@@ -502,11 +442,6 @@ def tqdm_print(line: str) -> None:
 
 
 def stage_done(task_identifier, stage: str, info=None, *, echo: bool = True) -> None:
-    """Mark that a task FINISHED a pipeline stage (a test milestone, spec gen, assertion checks),
-    with the stage's resulting info. Writes a ``[STAGE DONE]`` block to the task's .log
-    AND, when ``echo`` (default), prints a one-line ``✓ <task>  <stage>  | <info>`` to
-    the terminal so progress is visible per task, not just the tqdm count. Use this in
-    every per-task milestone loop across all methods/backbones."""
     if echo:
         tqdm_line = f"      ✓ {task_identifier}  {stage}"
         if info is not None:
@@ -519,14 +454,6 @@ def stage_done(task_identifier, stage: str, info=None, *, echo: bool = True) -> 
 
 
 def emit(task_identifier, sink: list, entry: dict) -> None:
-    """Append ``entry`` (with its prompt) to the in-memory ``sink`` (phases/traces,
-    used to build the saved record transcript) AND live-log its RESPONSE/RESULT to
-    the task's .log right away.
-
-    The prompt is intentionally NOT re-logged here: the backend already wrote it
-    live at dispatch (see :func:`log_call_prompt`), so emitting it again would
-    duplicate it. We still keep the prompt in ``sink`` for the full generation.jsonl
-    transcript."""
     sink.append(entry)
     if entry.get("response") is None and entry.get("result") is None:
         return
