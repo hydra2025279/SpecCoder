@@ -20,17 +20,17 @@ if PROJECT_ROOT is None:
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from SpecCoder.spec_evaluation import (  # noqa: E402
+from SpecCoder.spec_evaluation import (  
     compute_completeness_batched,
     compute_correctness,
 )
-from SpecCoder.spec_utils import (  # noqa: E402
+from SpecCoder.spec_utils import (  
     apply_single_mutant_record,
     build_full_code,
     extract_assertions_from_annotated_code,
     find_mutant_record_line_index,
 )
-from SpecCoder.trace_collection import (  # noqa: E402
+from SpecCoder.trace_collection import (  
     instrument_assertions_in_completion,
     instrument_mutant_lines_in_completion,
     mutant_reach_id,
@@ -58,10 +58,6 @@ def record_task_id(rec: dict[str, Any]) -> str:
 
 
 def _strip_code_fences(text: str) -> str:
-    """Drop stray Markdown code fences (```` ``` ````/```` ```python ````) that some
-    LLM responses leave in the saved program. A bare fence line is not valid Python,
-    so if it survives into the annotated code it breaks the whole program's compile
-    (every checkpoint then reports 0 reaches)."""
     if "```" not in text:
         return text
     kept = [ln for ln in text.split("\n") if not ln.lstrip().startswith("```")]
@@ -69,7 +65,6 @@ def _strip_code_fences(text: str) -> str:
 
 
 def _is_main_guard(node: ast.AST) -> bool:
-    """True for a top-level ``if __name__ == '__main__':`` block."""
     if not isinstance(node, ast.If):
         return False
     test = node.test
@@ -81,8 +76,6 @@ def _is_main_guard(node: ast.AST) -> bool:
 
 
 def _has_entrypoint_invocation(tree: ast.Module) -> bool:
-    """True if the module actually *runs* something at top level — either an
-    ``if __name__ == '__main__'`` guard or a bare top-level call expression."""
     for node in tree.body:
         if _is_main_guard(node):
             return True
@@ -92,12 +85,6 @@ def _has_entrypoint_invocation(tree: ast.Module) -> bool:
 
 
 def _append_missing_entrypoint(annotated: str, clean: str) -> str:
-    """Some generations (e.g. cf_3C) drop the trailing entry-point that
-    ``clean_code`` has — the annotated program defines ``main()`` but never calls
-    it, so nothing executes and every checkpoint reports 0 reaches. When the
-    annotated program has no top-level invocation but ``clean_code`` does, splice
-    clean's trailing entry-point (the ``__main__`` guard, or a bare call to a
-    function the annotated program defines) back on."""
     if not annotated.strip() or not clean.strip():
         return annotated
     try:
@@ -131,11 +118,6 @@ def _append_missing_entrypoint(annotated: str, clean: str) -> str:
 
 
 def annotated_of(rec: dict[str, Any]) -> str:
-    """The program with inline asserts.
-
-    Current spec runners store it as ``annotated_code``; older records may store
-    the same annotated program as ``code``.
-    """
     annotated = rec.get("annotated_code")
     if isinstance(annotated, list):
         annotated = annotated[0] if annotated else ""
