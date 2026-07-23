@@ -33,11 +33,6 @@ JUDGE_SYSTEM = (
 
 
 def _judge_use_lora(opt) -> bool:
-    """Resolve ``--judge-finetune`` to a ``use_lora`` flag for the verdict call:
-    ``base`` -> False, ``finetune`` -> True, ``auto`` (default) -> follow
-    ``--speccoder_finetune`` (LoRA judge when finetuning, base otherwise). ``use_lora``
-    is a no-op when no adapter is loaded, so ``finetune`` without ``--speccoder_finetune``
-    still runs base."""
     mode = getattr(opt, "judge_finetune", "auto")
     if mode == "base":
         return False
@@ -47,8 +42,6 @@ def _judge_use_lora(opt) -> bool:
 
 
 def _cleaned_rs(rs):
-    """A view of the reach/satisfy result with syntax-invalid checkpoints dropped, so the
-    judge prompt's analysis never classifies a natural-language `# assert` as VIOLATED."""
     if rs is None:
         return None
     specs = [s for s in rs.specs if _is_valid_eval_expr(s.expr)]
@@ -57,19 +50,12 @@ def _cleaned_rs(rs):
 
 
 def _real_violations(rs) -> list:
-    """Violated checkpoints that are GENUINE bugs, excluding specs whose expression is not
-    valid Python. An unparseable expr (natural-language `# assert`) is instrumented as
-    `lambda: False`, so it is reached but never satisfied -> spuriously [VIOLATED]. We treat
-    such specs as satisfied (ignored), so they never push a verdict toward 'buggy'."""
     if rs is None:
         return []
     return [s for s in rs.violated if _is_valid_eval_expr(s.expr)]
 
 
 def _format_reach_satisfy_report(rs) -> str:
-    """Local report (analog of assertrepair's, but honest about unparseable specs): a spec
-    whose expr is not valid Python is reported as IGNORED/treated-satisfied rather than
-    [VIOLATED], matching the verdict logic."""
     if rs is None or not getattr(rs, "specs", None):
         return "(no specifications evaluated)"
     out = [f"Computed by executing the program on all {rs.num_tests} test case(s)."]
@@ -89,16 +75,11 @@ def _format_reach_satisfy_report(rs) -> str:
 
 
 def _resolve_test_inputs(batch, backend, opt, log_dir: str):
-    """Test INPUTS feeding the reach/satisfy execution: the dataset's real public
-    ``test_cases``. Returns ``(tests_per_task, source_per_task)`` aligned to ``batch``."""
     return [list(t.get("test_cases") or []) for t in batch], ["oracle"] * len(batch)
 
 
 def build_judge_prompt(task: dict[str, Any], annotated_with_evidence: str,
                        violated: list, rs_result=None) -> str:
-    """Correctness-judge prompt (assertrepair's analysis prompt, re-aimed at a YES/NO verdict
-    instead of analysis+repair). Shows the program annotated with inline reach/satisfy evidence,
-    the violated checkpoints, and the per-checkpoint execution analysis; asks for a verdict."""
     analysis = format_checkpoint_analysis(rs_result, violated)
     analysis_block = (
         f"\n### Checkpoint execution analysis (how many executions reach and satisfy each `# assert`)\n{analysis}\n"
@@ -133,10 +114,6 @@ line: `<answer>YES</answer>` if the program is correct, or `<answer>NO</answer>`
 def _write_task_log(log_dir: str, task_id: str, *, spec_prompt: str, spec_resp: str,
                     rs, num_specs: int, num_violated: int, judge_prompt: str,
                     judge_resp: str, verdict: bool, source: str) -> None:
-    """ONE log file per task, in pipeline order: (1) spec-generation prompt+response,
-    (2) per-spec execution evidence (how many executions reach/satisfy each `# assert`
-    and that spec's VIOLATED/always-satisfied/never-reached verdict), (3) the LLM
-    correctness-verdict prompt+response, (4) the final correct/buggy verdict."""
     sep = "═" * 72
     report = _format_reach_satisfy_report(rs) if rs is not None else "(no specs generated / spec eval error)"
     src = source
@@ -157,7 +134,6 @@ def _write_task_log(log_dir: str, task_id: str, *, spec_prompt: str, spec_resp: 
 
 
 def run(tasks: list[dict[str, Any]], backend, opt, generation_path: str, log_dir: str) -> list[dict[str, Any]]:
-    # Lazy import to avoid a circular import (run.py imports this module at top level).
     from SpecCoder.src.experiment.correctnesschecking.run import parse_yes_no
 
     existing = load_latest_jsonl_by_task(generation_path)
