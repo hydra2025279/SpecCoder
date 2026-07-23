@@ -54,9 +54,6 @@ def _exposes_bug(code: str, test: dict[str, str], timeout: float) -> bool:
 
 
 def _localize_signal_text(spec: str, test: dict[str, str] | None, raw_review: str) -> str:
-    """Compose specrover's LOCALIZE context: the inferred behavioural spec, the
-    bug-reproducing test, and the grounded reviewer analysis. Used to build the
-    saved localize prompt, independent of whether the patch was approved."""
     parts: list[str] = []
     if spec:
         parts.append(f"Inferred specification of the intended behaviour:\n{spec}")
@@ -116,8 +113,6 @@ def _review(sample, spec: str, patch_0: str, test, backend, opt, costs):
 
 
 def _gen_reproducers_batched(samples, buggys, idx, backend, opt, costs, phases):
-    """Reproduce the bug for ``idx`` samples, batching one LLM call per retry-round
-    across all still-pending samples. Returns ``{i: test_case|None}``."""
     last: dict[int, dict[str, str] | None] = {i: None for i in idx}
     found: dict[int, dict[str, str] | None] = {i: None for i in idx}
     pending = list(idx)
@@ -154,10 +149,7 @@ def _gen_reproducers_batched(samples, buggys, idx, backend, opt, costs, phases):
 
 
 def improve_batch(samples, buggys, candidates, backend, opt, states) -> list[tuple[str, dict[str, Any]]]:
-    """Batched SpecRover signal. Reproducer (per-retry-round batched) + spec
-    (batched) are cached per sample in ``states[i]``; the reviewer is grounded by
-    executing the reproducer on buggy+candidate, then run batched; rejected
-    candidates are refined in one batched repair call. Returns ``[(new_code, info)]``."""
+
     n = len(samples)
     t0 = time.perf_counter()
     costs: list[list[dict[str, int]]] = [[] for _ in range(n)]
