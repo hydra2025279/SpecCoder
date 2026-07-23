@@ -45,20 +45,12 @@ def code_block_score(code: str) -> int:
 def select_code_block(blocks: list[str]) -> str:
     if not blocks:
         return ""
-    # Prefer the LAST fenced block (the model's final answer) — on a score tie the
-    # larger index wins; with no script signals at all, fall back to the last block.
     scored = [(code_block_score(block), idx, block) for idx, block in enumerate(blocks)]
     best_score, _idx, best_block = max(scored, key=lambda item: (item[0], item[1]))
     return best_block if best_score > 0 else blocks[-1]
 
 
 def extract_code(response: str) -> str:
-    """Runnable Python from a response.
-
-    Prefer fenced blocks inside ``<solution>`` and select the block that looks
-    most like an executable stdin/stdout script. On ties (or when no block has
-    script signals) prefer the LAST fenced block, i.e. the model's final answer.
-    """
     match = _SOLUTION.search(response)
     scope = match.group(1) if match else response
     blocks = python_blocks(scope)
@@ -66,8 +58,6 @@ def extract_code(response: str) -> str:
 
 
 def extract_two_blocks(response: str) -> tuple[str, str]:
-    """For sequential two-block output: (Block 1 clean code, Block 2 annotated).
-    Falls back gracefully when only one block is present."""
     blocks = python_blocks(response)
     if not blocks:
         return "", ""
@@ -77,8 +67,6 @@ def extract_two_blocks(response: str) -> tuple[str, str]:
 
 
 def strip_assert_comments(code: str) -> str:
-    """Remove standalone ``# assert ...`` and ``# Postcondition: ...`` comment
-    lines, leaving the executable program (used to build the post-hoc input)."""
     out = []
     for line in code.splitlines():
         s = line.strip()
@@ -89,7 +77,6 @@ def strip_assert_comments(code: str) -> str:
 
 
 def estimate_token_count(text: str) -> int:
-    """Best-effort token estimate that works even when tokenizer deps are absent."""
     if not text:
         return 0
     try:
@@ -136,11 +123,6 @@ SUMMARY_FILE = "summary.json"
 
 
 def experiment_output_dir(kind: str, model: str, method: str) -> Path:
-    """``SpecCoder/output/<model_slug>/<kind>/<method>/``.
-
-    Layout is model-first: each model gets one tree, split by ``kind`` and then
-    a per-method/baseline leaf folder holding ``result.jsonl`` + logs. Output is
-    both written here and read back from here."""
     out = PROJECT_ROOT / "SpecCoder" / "output" / model_slug(model) / kind / method
     out.mkdir(parents=True, exist_ok=True)
     return out
@@ -154,11 +136,6 @@ def spec_gen_output_dir(
     speccoder_finetune: bool = False,
     make: bool = True,
 ) -> Path:
-    """``SpecCoder/output/spec_gen/<branch>/<model>/[<mode>/]<leaf>/``.
-
-    The active spec-generation pipeline is inline oracle generation over
-    HumanExec correct solutions. ``leaf`` is ``speccoder`` when finetuned else
-    ``base_model``."""
     leaf = "speccoder" if speccoder_finetune else "base_model"
     out = PROJECT_ROOT / "SpecCoder" / "output" / "spec_gen" / branch / model_slug(model)
     if mode:
@@ -170,12 +147,6 @@ def spec_gen_output_dir(
 
 
 def write_llm_log(path: str | Path, entries: list[dict[str, Any]], *, header: str = "") -> None:
-    """SpecMind-style prompt/response dump, written next to the generated jsonl.
-
-    Each entry may be either the legacy shape ``{task_id, prompt, response}``
-    or the multi-sample shape ``{task_id, prompt, samples}``, where each sample
-    carries ``response``, ``code`` and optional ``evaluation``.
-    """
     sep = "═" * 64
     lines: list[str] = []
     if header:
@@ -595,9 +566,6 @@ def generate_chat(
     gpu_memory_utilization: float = 0.95,
     cache_dir: str = "",
 ) -> list[list[str]]:
-    """One-shot vLLM generation (loads the engine, generates, returns). Kept for
-    callers that generate once; multi-round callers should use ``load_vllm`` +
-    ``vllm_chat`` to avoid reloading the model."""
     llm, tokenizer, lora_request = load_vllm(
         model, lora_path=lora_path, speccoder_finetune=speccoder_finetune,
         max_model_len=max_model_len,
