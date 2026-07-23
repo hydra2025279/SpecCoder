@@ -14,12 +14,6 @@ ImproveBatchFn = Callable[..., list[tuple[str, dict[str, Any]]]]
 # --------------------------------------------------------------------------- #
 
 def _expand(rows: list[dict[str, Any]], opt) -> tuple[list[dict[str, Any]], list[int]]:
-    """Expand each row into its per-attempt copies, SKIPPING attempt indices that
-    already exist in generation.jsonl.
-
-    ``opt.existing_attempts_by_task`` maps task_id -> set of already-generated
-    attempt indices; only the missing ones are regenerated. When unset (e.g. a
-    fresh run), every attempt 0..num_samples-1 is produced."""
     samples_per_task = max(1, int(getattr(opt, "num_samples", 1) or 1))
     existing = getattr(opt, "existing_attempts_by_task", None) or {}
     expanded: list[dict[str, Any]] = []
@@ -35,7 +29,6 @@ def _expand(rows: list[dict[str, Any]], opt) -> tuple[list[dict[str, Any]], list
 
 
 def _purellm_patch0_messages(opt, sample, buggy) -> list[dict[str, str]]:
-    """Bare repair prompt, except ``cot`` injects its reasoning instruction."""
     if getattr(opt, "method", "") == "cot":
         from SpecCoder.src.experiment.programrepair import cot
         return [
@@ -60,12 +53,6 @@ _SIGNAL_INFO_KEYS = (
 
 
 def _render_transcript(trace: list[dict[str, Any]], final_code: str) -> str:
-    """Render the full per-attempt trace into a readable transcript.
-
-    Each entry is one logged step (an LLM call or a grading checkpoint). We log
-    whatever the entry carries: ``[PROMPT]`` and ``[RESPONSE]`` for every LLM call
-    (so no call is ever silent), and ``[TEST RESULT]`` for a grading step. The goal
-    is full prompt+response coverage for every call across every turn/iteration."""
     out: list[str] = []
     for e in trace:
         tag = e.get("name", "")
@@ -253,10 +240,6 @@ def purellm_localize_replay(rows, existing_generation, backend, opt) -> int:
 
 
 def _write_localize_log(log_dir, rec, opt) -> None:
-    """One per-task localize log under ``localize/<method>/log/<task>.log``.
-
-    Intentionally minimal: only the FINAL localize prompt and response (plus the
-    predicted lines) — not the per-stage transcript the repair log keeps."""
     import json
     import os
 
@@ -280,7 +263,7 @@ def _write_localize_log(log_dir, rec, opt) -> None:
         "[PREDICTED LINES] (least -> most certain)",
         json.dumps(rec.get("prediction", []), ensure_ascii=False, indent=2),
         "",
-        f"── END LOCALIZE TASK={rec['task_id']} ──────────────────────────────────",
+        f"── END LOCALIZE TASK={rec['task_id']} ─────────────────────────────────",
         "",
     ]
     with open(path, "a", encoding="utf-8") as f:
