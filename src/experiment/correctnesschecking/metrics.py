@@ -47,36 +47,35 @@ def _safe_div(num: float, den: float) -> float:
 
 
 def classification_metrics(tp: int, tn: int, fp: int, fn: int) -> dict[str, float]:
+    """Compute confusion-matrix metrics with corrected class-conditional rates.
+
+    This fixes the previous implementation, which incorrectly normalized TPR,
+    FNR, FPR, and TNR by the total sample count. TPR/FNR are normalized by
+    TP + FN, while TNR/FPR are normalized by TN + FP. Each ill-defined ratio
+    degrades to 0.0.
+    """
     n = tp + tn + fp + fn
-
-    tpr = _safe_div(tp, n)
-    fnr = _safe_div(fn, n)
-
-    balanced_accuracy = (
-        _safe_div(tp, tp + fn) +
-        _safe_div(tn, tn + fp)
-    ) / 2.0
-
-    fpr = _safe_div(fp, n)
-    tnr = 1.0 - fpr
-
-    denom = math.sqrt(
-        (tp + fp) *
-        (tp + fn) *
-        (tn + fp) *
-        (tn + fn)
-    )
+    tpr = _safe_div(tp, tp + fn)          # recall / sensitivity
+    tnr = _safe_div(tn, tn + fp)          # specificity
+    fnr = _safe_div(fn, tp + fn)          # 1 - tpr
+    fpr = _safe_div(fp, fp + tn)          # 1 - tnr
+    precision = _safe_div(tp, tp + fp)
+    # MCC with a guarded denominator (any zero margin -> denom 0 -> MCC 0.0).
+    denom = math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
     mcc = _safe_div(tp * tn - fp * fn, denom)
-
     return {
         "mcc": mcc,
-        "balanced_accuracy": balanced_accuracy,
+        "balanced_accuracy": (tpr + tnr) / 2.0,
         "tpr": tpr,
         "fnr": fnr,
         "fpr": fpr,
         "tnr": tnr,
         "accuracy": _safe_div(tp + tn, n),
+        "precision": precision,
+        "recall": tpr,
+        "f1": _safe_div(2 * precision * tpr, precision + tpr),
     }
+
 
 def relative_mcc_improvement(mcc: float, vanilla_mcc: float | None) -> float | None:
     """Relative MCC improvement over Vanilla: (MCC - MCC_v) / |MCC_v|.
